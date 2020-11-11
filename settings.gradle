@@ -1,0 +1,2 @@
+rootProject.name='DexEncryption'
+include ':app'
