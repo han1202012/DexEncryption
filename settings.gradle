@@ -1,2 +1,4 @@
 rootProject.name='DexEncryption'
 include ':app'
+include ':multiple-dex-core'
+include ':multiple-dex-tools'
