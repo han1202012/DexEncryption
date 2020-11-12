@@ -9,6 +9,12 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
+        <!-- app_name 值是该应用的 Application 的真实全类名 -->
+        <meta-data android:name="app_name" android:value="kim.hsl.multipledex.ProxyApplication"/>
+        <!-- DEX 解密之后的目录名称 -->
+        <meta-data android:name="app_directory" android:value="/dex_encryption"/>
+
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
