@@ -3,10 +3,11 @@ package kim.hsl.multipledex
 import android.app.Application
 import android.content.Context
 import android.content.pm.ApplicationInfo
-import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.os.Bundle
 import java.io.File
+import java.io.FileOutputStream
+import java.util.zip.ZipFile
 
 class ProxyApplication : Application() {
 
@@ -74,7 +75,87 @@ class ProxyApplication : Application() {
 
         // app 中存放的是解压后的所有的 apk 文件
         // app 下创建 dexDir 目录 , 将所有的 dex 目录移动到该 deDir 目录中
+        // dexDir 目录存放应用的所有 dex 文件
+        // 这些 dex 文件都需要进行解密
         var dexDir : File = File(appDir, "dexDir")
+
+        // 如果该 dexDir 存在 , 并且该目录不为空 , 并进行 MD5 文件校验
+        if(dexDir.exists() || dexDir.list().size != 0){
+            // 将 apk 中的文件解压到了 appDir 目录
+            unZip(apkFile, appDir)
+
+            // 获取 appDir 目录下的所有文件
+            var files = appDir.listFiles()
+
+            // 00:07:43
+
+        }else{
+            //
+
+        }
+
+    }
+
+    /**
+     * 删除文件, 如果有目录, 则递归删除
+     */
+    private fun deleteFile(file: File) {
+        if (file.isDirectory) {
+            val files = file.listFiles()
+            for (f in files) {
+                deleteFile(f)
+            }
+        } else {
+            file.delete()
+        }
+    }
+
+    /**
+     * 解压文件
+     * @param zip 被解压的压缩包文件
+     * @param dir 解压后的文件存放目录
+     */
+    fun unZip(zip: File, dir: File) {
+        try { // 如果存放文件目录存在, 删除该目录
+            deleteFile(dir)
+            // 获取 zip 压缩包文件
+            val zipFile = ZipFile(zip)
+            // 获取 zip 压缩包中每一个文件条目
+            val entries = zipFile.entries()
+            // 遍历压缩包中的文件
+            while (entries.hasMoreElements()) {
+                val zipEntry = entries.nextElement()
+                // zip 压缩包中的文件名称 或 目录名称
+                val name = zipEntry.name
+                // 如果 apk 压缩包中含有以下文件 , 这些文件是 V1 签名文件保存目录 , 不需要解压 , 跳过即可
+                if (name == "META-INF/CERT.RSA" || name == "META-INF/CERT.SF" || (name
+                            == "META-INF/MANIFEST.MF")
+                ) {
+                    continue
+                }
+                // 如果该文件条目 , 不是目录 , 说明就是文件
+                if (!zipEntry.isDirectory) {
+                    val file = File(dir, name)
+                    // 创建目录
+                    if (!file.parentFile.exists()) {
+                        file.parentFile.mkdirs()
+                    }
+                    // 向刚才创建的目录中写出文件
+                    val fileOutputStream = FileOutputStream(file)
+                    val inputStream = zipFile.getInputStream(zipEntry)
+                    val buffer = ByteArray(1024)
+                    var len: Int
+                    while (inputStream.read(buffer).also { len = it } != -1) {
+                        fileOutputStream.write(buffer, 0, len)
+                    }
+                    inputStream.close()
+                    fileOutputStream.close()
+                }
+            }
+            zipFile.close()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
 }
