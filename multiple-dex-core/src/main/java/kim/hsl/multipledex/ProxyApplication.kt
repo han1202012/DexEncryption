@@ -128,6 +128,9 @@ class ProxyApplication : Application() {
     /**
      * 加载 dex 文件集合
      * 这些 dex 文件已经解密
+     * 参考博客 : https://hanshuliang.blog.csdn.net/article/details/109608605
+     *
+     * 创建自己的 Element[] dexElements 数组
      */
     fun loadDex ( dexList : ArrayList<File> ) : Unit{
 
