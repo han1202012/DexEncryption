@@ -5,9 +5,11 @@ import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.text.TextUtils
 import java.io.File
 import java.io.FileOutputStream
 import java.util.zip.ZipFile
+
 
 class ProxyApplication : Application() {
 
@@ -79,22 +81,58 @@ class ProxyApplication : Application() {
         // 这些 dex 文件都需要进行解密
         var dexDir : File = File(appDir, "dexDir")
 
+        // 遍历解压后的 apk 文件 , 将需要加载的 dex 放入如下集合中
+        var dexFiles : ArrayList<File> = ArrayList<File>()
+
         // 如果该 dexDir 存在 , 并且该目录不为空 , 并进行 MD5 文件校验
-        if(dexDir.exists() || dexDir.list().size != 0){
+        if( !dexDir.exists() || dexDir.list().size == 0){
             // 将 apk 中的文件解压到了 appDir 目录
             unZip(apkFile, appDir)
 
             // 获取 appDir 目录下的所有文件
             var files = appDir.listFiles()
 
-            // 00:07:43
+            // 遍历文件名称集合
+            for(i in files.indices){
+                var file = files[i]
+                // 如果文件后缀是 .dex , 并且不是 主 dex 文件 classes.dex
+                // 符合上述两个条件的 dex 文件放入到 dexDir 中
+                if(file.name.endsWith(".dex") &&
+                    TextUtils.equals(file.name, "classes.dex")){
+                    // 筛选出来的 dex 文件都是需要解密的
+                    // 解密需要使用 OpenSSL 进行解密
+
+                    // 获取该文件的二进制 Byte 数据
+                    // 这些 Byte 数组就是加密后的 dex 数据
+                    var bytes = Utils.getBytes(file)
+
+                    // 解密该二进制数据, 并替换原来的加密 dex, 直接覆盖原来的文件即可
+                    Utils.decrypt(bytes, file.absolutePath)
+
+                    // 将解密完毕的 dex 文件放在需要加载的 dex 集合中
+                    dexFiles.add(file)
+
+                }// 判定是否是需要解密的 dex 文件
+            }// 遍历 apk 解压后的文件
 
         }else{
-            //
-
+            // 已经解密完成, 此时不需要解密, 直接获取 dexDir 中的文件即可
+            for (file in dexDir.listFiles()) {
+                dexFiles.add(file)
+            }
         }
 
+        // 截止到此处 , 已经拿到了解密完毕 , 需要加载的 dex 文件
     }
+
+    /**
+     * 加载 dex 文件集合
+     * 这些 dex 文件已经解密
+     */
+    fun loadDex ( dexList : ArrayList<File> ) : Unit{
+
+    }
+
 
     /**
      * 删除文件, 如果有目录, 则递归删除

@@ -17,7 +17,7 @@ public class Utils {
 
 
     /**
-     * 读取文件
+     * 从文件中读取 Byte 数组
      * @param file
      * @return
      * @throws Exception
