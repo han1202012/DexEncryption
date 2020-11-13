@@ -123,6 +123,8 @@ class ProxyApplication : Application() {
         }
 
         // 截止到此处 , 已经拿到了解密完毕 , 需要加载的 dex 文件
+        // 加载自己解密的 dex 文件
+        loadDex(dexFiles)
     }
 
     /**
@@ -131,6 +133,8 @@ class ProxyApplication : Application() {
      * 参考博客 : https://hanshuliang.blog.csdn.net/article/details/109608605
      *
      * 创建自己的 Element[] dexElements 数组
+     * ( libcore/dalvik/src/main/java/dalvik/system/DexPathList.java )
+     * 00:17:07
      */
     fun loadDex ( dexList : ArrayList<File> ) : Unit{
 
