@@ -21,11 +21,11 @@ class ProxyApplication : Application() {
     /**
      * DEX 解密之后的目录名称
      */
-    lateinit var app_directory : String
+    lateinit var app_version : String
 
     /**
      * 在 Application 在 ActivityThread 中被创建之后,
-     * 一个调用的方法是 attachBaseContext 函数.
+     * 第一个调用的方法是 attachBaseContext 函数.
      * 该函数是 Application 中最先执行的函数.
      */
     override fun attachBaseContext(base: Context?) {
@@ -43,7 +43,7 @@ class ProxyApplication : Application() {
                 先进行解密, 然后再加载解密之后的 DEX 文件
 
                 1. 先获取当前的 APK 文件
-                2.
+                2. 然后解压该 APK 文件
          */
 
         // 获取当前的 APK 文件, 下面的 getApplicationInfo().sourceDir 就是本应用 APK 安装文件的全路径
@@ -62,14 +62,14 @@ class ProxyApplication : Application() {
             if(metaData.containsKey("app_name")){
                 app_name = metaData.getString("app_name").toString()
             }
-            // 检查是否存在 app_directory 元数据
-            if(metaData.containsKey("app_directory")){
-                app_directory = metaData.getString("app_directory").toString()
+            // 检查是否存在 app_version 元数据
+            if(metaData.containsKey("app_version")){
+                app_version = metaData.getString("app_version").toString()
             }
         }
 
         // 创建用户的私有目录 , 将 apk 文件解压到该目录中
-        var privateDir : File = getDir("${app_name}_${app_directory}", MODE_PRIVATE)
+        var privateDir : File = getDir("${app_name}_${app_version}", MODE_PRIVATE)
 
         // 在上述目录下创建 app 目录
         // 创建该目录的目的是存放解压后的 apk 文件的
@@ -87,7 +87,7 @@ class ProxyApplication : Application() {
         // 如果该 dexDir 存在 , 并且该目录不为空 , 并进行 MD5 文件校验
         if( !dexDir.exists() || dexDir.list().size == 0){
             // 将 apk 中的文件解压到了 appDir 目录
-            unZip(apkFile, appDir)
+            unApkZip(apkFile, appDir)
 
             // 获取 appDir 目录下的所有文件
             var files = appDir.listFiles()
@@ -160,7 +160,7 @@ class ProxyApplication : Application() {
      * @param zip 被解压的压缩包文件
      * @param dir 解压后的文件存放目录
      */
-    fun unZip(zip: File, dir: File) {
+    fun unApkZip(zip: File, dir: File) {
         try { // 如果存放文件目录存在, 删除该目录
             deleteFile(dir)
             // 获取 zip 压缩包文件
