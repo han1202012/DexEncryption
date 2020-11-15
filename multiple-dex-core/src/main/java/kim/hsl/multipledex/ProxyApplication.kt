@@ -87,7 +87,7 @@ class ProxyApplication : Application() {
         // 如果该 dexDir 存在 , 并且该目录不为空 , 并进行 MD5 文件校验
         if( !dexDir.exists() || dexDir.list().size == 0){
             // 将 apk 中的文件解压到了 appDir 目录
-            unApkZip(apkFile, appDir)
+            unZipApk(apkFile, appDir)
 
             // 获取 appDir 目录下的所有文件
             var files = appDir.listFiles()
@@ -160,8 +160,9 @@ class ProxyApplication : Application() {
      * @param zip 被解压的压缩包文件
      * @param dir 解压后的文件存放目录
      */
-    fun unApkZip(zip: File, dir: File) {
-        try { // 如果存放文件目录存在, 删除该目录
+    fun unZipApk(zip: File, dir: File) {
+        try {
+            // 如果存放文件目录存在, 删除该目录
             deleteFile(dir)
             // 获取 zip 压缩包文件
             val zipFile = ZipFile(zip)
@@ -197,6 +198,8 @@ class ProxyApplication : Application() {
                     fileOutputStream.close()
                 }
             }
+
+            // 关闭 zip 文件
             zipFile.close()
         } catch (e: Exception) {
             e.printStackTrace()
