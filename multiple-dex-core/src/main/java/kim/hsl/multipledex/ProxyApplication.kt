@@ -4,14 +4,15 @@ import android.app.Application
 import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.text.TextUtils
 import java.io.File
 import java.io.FileOutputStream
+import java.io.IOException
 import java.lang.reflect.Field
 import java.lang.reflect.Method
 import java.util.zip.ZipFile
-import kotlin.collections.ArrayList
 
 
 class ProxyApplication : Application() {
@@ -127,7 +128,7 @@ class ProxyApplication : Application() {
 
         // 截止到此处 , 已经拿到了解密完毕 , 需要加载的 dex 文件
         // 加载自己解密的 dex 文件
-        loadDex(dexFiles)
+        loadDex(dexFiles, privateDir)
     }
 
     /**
@@ -140,7 +141,7 @@ class ProxyApplication : Application() {
      * 然后将 系统加载的 Element[] dexElements 数组 与 我们自己的 Element[] dexElements 数组进行合并操作
      * 00:17:07
      */
-    fun loadDex(dexList: ArrayList<File>) : Unit{
+    fun loadDex(dexFiles : ArrayList<File>, optimizedDirectory : File) : Unit{
 
         /*
             需要执行的步骤
@@ -186,6 +187,32 @@ class ProxyApplication : Application() {
 
          */
         //00:27:32
+        var makeDexElements: Method
+        var addElements : Array<Any>
+
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && Build.VERSION.SDK_INT <
+                Build.VERSION_CODES.M){ // 5.0, 5.1 6.0 版本 ( 3 参数 )
+
+            // 反射 5.0, 5.1, 6.0 版本的 DexPathList 中的 makeDexElements 方法
+            makeDexElements = reflexMethod(pathList, "makeDexElements",
+                    ArrayList::class.java, File::class.java, ArrayList::class.java)
+            var suppressedExceptions: ArrayList<IOException> = ArrayList<IOException>()
+            addElements = makeDexElements.invoke(pathList, dexFiles,
+                    optimizedDirectory,
+                    suppressedExceptions) as Array<Any>
+
+        }else if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N){   // 7.0 以上版本 ( 4 参数 )
+
+            // 反射 7.0 以上版本的 DexPathList 中的 makeDexElements 方法
+            makeDexElements = reflexMethod(pathList, "makeDexElements",
+                    ArrayList::class.java, File::class.java, ArrayList::class.java)
+            var suppressedExceptions: ArrayList<IOException> = ArrayList<IOException>()
+            addElements = makeDexElements.invoke(pathList, dexFiles,
+                    optimizedDirectory,
+                    suppressedExceptions) as Array<Any>
+
+        }
+
 
 
 
