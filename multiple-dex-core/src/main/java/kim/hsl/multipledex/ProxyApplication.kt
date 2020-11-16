@@ -8,7 +8,10 @@ import android.os.Bundle
 import android.text.TextUtils
 import java.io.File
 import java.io.FileOutputStream
+import java.lang.reflect.Field
+import java.lang.reflect.Method
 import java.util.zip.ZipFile
+import kotlin.collections.ArrayList
 
 
 class ProxyApplication : Application() {
@@ -53,8 +56,8 @@ class ProxyApplication : Application() {
         // 应用真实的 Application 全类名
         // 解密后的 dex 文件存放目录
         var applicationInfo : ApplicationInfo = packageManager.getApplicationInfo(
-            packageName,
-            PackageManager.GET_META_DATA
+                packageName,
+                PackageManager.GET_META_DATA
         );
         var metaData : Bundle = applicationInfo.metaData
         if(metaData != null){
@@ -134,10 +137,122 @@ class ProxyApplication : Application() {
      *
      * 创建自己的 Element[] dexElements 数组
      * ( libcore/dalvik/src/main/java/dalvik/system/DexPathList.java )
+     * 然后将 系统加载的 Element[] dexElements 数组 与 我们自己的 Element[] dexElements 数组进行合并操作
      * 00:17:07
      */
-    fun loadDex ( dexList : ArrayList<File> ) : Unit{
+    fun loadDex(dexList: ArrayList<File>) : Unit{
 
+        /*
+            需要执行的步骤
+            1 . 获得系统 DexPathList 中的 Element[] dexElements 数组
+                ( libcore/dalvik/src/main/java/dalvik/system/DexPathList.java )
+            2 . 在本应用中创建 Element[] dexElements 数组 , 用于存放解密后的 dex 文件
+            3 . 将 系统加载的 Element[] dexElements 数组
+                与 我们自己的 Element[] dexElements 数组进行合并操作
+            4 . 替换 ClassLoader 加载过程中的 Element[] dexElements 数组 ( 封装在 DexPathList 中 )
+         */
+
+
+        /*
+            1 . 获得系统 DexPathList 中的 Element[] dexElements 数组
+
+            第一阶段 : 在 Context 中调用 getClassLoader() 方法 , 可以拿到 PathClassLoader ;
+
+            第二阶段 : 从 PathClassLoader 父类 BaseDexClassLoader 中找到 DexPathList ;
+
+            第三阶段 : 获取封装在 DexPathList 类中的 Element[] dexElements 数组 ;
+
+            上述的 DexPathList 对象 是 BaseDexClassLoader 的私有成员
+            Element[] dexElements 数组 也是 DexPathList 的私有成员
+            因此只能使用反射获取 Element[] dexElements 数组
+         */
+
+        // 阶段一二 : 调用 getClassLoader() 方法可以获取 PathClassLoader 对象
+        // 从 PathClassLoader 对象中获取 private final DexPathList pathList 成员
+        var pathListField = reflexField(classLoader, "DexPathList");
+        // 获取 classLoader 对象对应的 DexPathList pathList 成员
+        var pathList = pathListField.get(classLoader)
+
+        //阶段三 : 获取封装在 DexPathList 类中的 Element[] dexElements 数组
+        var dexElementsField = reflexField(pathList, "dexElements")
+        // 获取 pathList 对象对应的 Element[] dexElements 数组成员
+        var dexElements : Array<Any> = dexElementsField.get(pathList) as Array<Any>
+
+
+
+        /*
+            2 . 在本应用中创建 Element[] dexElements 数组 , 用于存放解密后的 dex 文件
+                不同的 Android 版本中 , 创建 Element[] dexElements 数组的方法不同 , 这里需要做兼容
+
+         */
+        //00:27:32
+
+
+
+    }
+
+
+    /**
+     * 通过反射方法获取 instance 类中的 memberName 名称的成员
+     */
+    fun reflexField(instance: Any, memberName: String): Field {
+
+        // 获取字节码类
+        var clazz: Class<*>? = instance.javaClass
+
+        // 循环通过反射获取
+        // 可能存在通过反射没有找到成员的情况 , 此时查找其父类是否有该成员
+        // 循环次数就是其父类层级个数
+        while (clazz != null) {
+            try {
+                // 获取成员
+                val memberField = clazz.getDeclaredField(memberName)
+
+                // 如果不是 public , 无法访问 , 设置可访问
+                if (!memberField.isAccessible) {
+                    memberField.isAccessible = true
+                }
+                return memberField
+            } catch (e: NoSuchFieldException) {
+                // 如果找不到, 就到父类中查找
+                clazz = clazz.superclass
+            }
+        }
+
+        // 如果没有拿到成员 , 则直接中断程序 , 加载无法进行下去
+        throw NoSuchFieldException("没有在 ${instance.javaClass} 类中找到 $memberName 成员")
+    }
+
+
+    /**
+     * 通过反射方法获取 instance 类中的 参数为 parameterTypes , 名称为 methodName 的成员方法
+     */
+    fun reflexMethod(instance: Any, methodName: String, vararg parameterTypes: Class<*>?): Method {
+
+        // 获取字节码类
+        var clazz: Class<*>? = instance.javaClass
+
+        // 循环通过反射获取
+        // 可能存在通过反射没有找到成员方法的情况 , 此时查找其父类是否有该成员方法
+        // 循环次数就是其父类层级个数
+        while (clazz != null) {
+            try {
+                // 获取成员方法
+                val method = clazz.getDeclaredMethod(methodName, *parameterTypes)
+
+                // 如果不是 public , 无法访问 , 设置可访问
+                if (!method.isAccessible) {
+                    method.isAccessible = true
+                }
+                return method
+            } catch (e: NoSuchMethodException) {
+                // 如果找不到, 就到父类中查找
+                clazz = clazz.superclass
+            }
+        }
+
+        // 如果没有拿到成员 , 则直接中断程序 , 加载无法进行下去
+        throw NoSuchMethodException("没有在 ${instance.javaClass} 类中找到 $methodName 成员方法")
     }
 
 
