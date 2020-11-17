@@ -186,7 +186,6 @@ class ProxyApplication : Application() {
                 不同的 Android 版本中 , 创建 Element[] dexElements 数组的方法不同 , 这里需要做兼容
 
          */
-        //00:27:32
         var makeDexElements: Method
         var addElements : Array<Any>
 
@@ -212,6 +211,8 @@ class ProxyApplication : Application() {
                     suppressedExceptions) as Array<Any>
 
         }
+
+        //00:31:31
 
 
 
