@@ -9,14 +9,17 @@ import java.util.Arrays;
 
 public class Utils {
 
-    static {
+    /*static {
         System.loadLibrary("dn_ssl");
     }
 
     //00:40:02
 
-    public static native void decrypt(byte[] data,String path);
+    public static native void decrypt(byte[] data,String path);*/
 
+    public static void decrypt(byte[] data,String path){
+
+    }
 
     /**
      * 从文件中读取 Byte 数组
