@@ -187,7 +187,7 @@ class ProxyApplication : Application() {
 
          */
         var makeDexElements: Method
-        var addElements : Array<Any>
+        var addElements : Array<Any> = Array(0, {})
 
         if(Build.VERSION.SDK_INT <=
                 Build.VERSION_CODES.LOLLIPOP_MR1){ // 5.0, 5.1  makeDexElements
@@ -212,10 +212,28 @@ class ProxyApplication : Application() {
 
         }
 
-        //00:31:31
+        /*
+            3 . 将 系统加载的 Element[] dexElements 数组
+                与 我们自己的 Element[] dexElements 数组进行合并操作
+
+            首先创建数组 , 数组类型与 dexElements 数组类型相同
+            将 dexElements 数组中的元素拷贝到 newElements 前半部分, 拷贝元素个数是 dexElements.size
+            将 addElements 数组中的元素拷贝到 newElements 后半部分, 拷贝元素个数是 dexElements.size
+         */
+        var newElements: Array<Any> = java.lang.reflect.Array.newInstance(dexElements.javaClass.componentType,
+                dexElements.size + addElements.size) as Array<Any>
+
+        // 将 dexElements 数组中的元素拷贝到 newElements 前半部分, 拷贝元素个数是 dexElements.size
+        System.arraycopy(dexElements, 0, newElements, 0, dexElements.size)
+
+        // 将 addElements 数组中的元素拷贝到 newElements 后半部分, 拷贝元素个数是 dexElements.size
+        System.arraycopy(addElements, 0, newElements, dexElements.size, addElements.size)
 
 
-
+        /*
+            4 . 替换 ClassLoader 加载过程中的 Element[] dexElements 数组 ( 封装在 DexPathList 中 )
+         */
+        dexElementsField.set(pathList, newElements)
 
     }
 
