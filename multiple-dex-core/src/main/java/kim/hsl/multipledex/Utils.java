@@ -13,6 +13,8 @@ public class Utils {
         System.loadLibrary("dn_ssl");
     }
 
+    //00:40:02
+
     public static native void decrypt(byte[] data,String path);
 
 
