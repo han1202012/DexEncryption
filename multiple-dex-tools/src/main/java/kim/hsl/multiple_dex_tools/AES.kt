@@ -1,9 +1,10 @@
 package kim.hsl.multiple_dex_tools
 
 import java.io.File
+import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.RandomAccessFile
-import java.util.zip.ZipFile
+import java.util.zip.*
 import javax.crypto.Cipher
 import javax.crypto.spec.SecretKeySpec
 
@@ -177,6 +178,14 @@ fun main() {
 
     // 压缩打包 , 该压缩包是未签名的压缩包
     var unSignedApk = File("app/build/outputs/apk/debug/app-unsigned.apk")
+    // 压缩打包操作
+    zip(apkUnZipFile, unSignedApk)
+
+
+    /*
+        4 . 签名
+        00:22:34
+     */
 
 
 }
@@ -244,6 +253,61 @@ fun unZip(zip: File, dir: File) {
     } catch (e: Exception) {
         e.printStackTrace()
     }
+}
+
+fun zip(dir: File, zip: File) {
+    // 如果目标压缩包存在 , 删除该压缩包
+    zip.delete()
+    // 对输出文件做 CRC32 校验
+    val cos = CheckedOutputStream(FileOutputStream(
+            zip), CRC32())
+    val zos = ZipOutputStream(cos)
+    // 压缩文件
+    compress(dir, zos, "")
+    zos.flush()
+    zos.close()
+}
+
+private fun compress(srcFile: File, zos: ZipOutputStream, basePath: String) {
+    if (srcFile.isDirectory) {
+        val files = srcFile.listFiles()
+        for (file in files) {
+            // zip 递归添加目录中的文件
+            compress(file, zos, basePath + srcFile.name + "/")
+        }
+    } else {
+        compressFile(srcFile, zos, basePath)
+    }
+}
+
+
+private fun compressFile(file: File, zos: ZipOutputStream, dir: String) {
+    // 拼接完整的文件路径名称
+    val fullName = dir + file.name
+    // 需要去掉temp
+    val fileNames = fullName.split("/").toTypedArray()
+    // 正确的文件目录名 (去掉了temp)
+    val sb = StringBuffer()
+    if (fileNames.size > 1) {
+        for (i in 1 until fileNames.size) {
+            sb.append("/")
+            sb.append(fileNames[i])
+        }
+    } else {
+        sb.append("/")
+    }
+    //添加一个zip条目
+    val entry = ZipEntry(sb.substring(1))
+    zos.putNextEntry(entry)
+    //读取条目输出到zip中
+    val fis = FileInputStream(file)
+    var len: Int
+    val data = ByteArray(2048)
+    while (fis.read(data, 0, 2048).also { len = it } != -1) {
+        zos.write(data, 0, len)
+    }
+    fis.close()
+    zos.closeEntry()
 }
 
 
