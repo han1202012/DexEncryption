@@ -258,10 +258,12 @@ fun unZip(zip: File, dir: File) {
 fun zip(dir: File, zip: File) {
     // 如果目标压缩包存在 , 删除该压缩包
     zip.delete()
+
     // 对输出文件做 CRC32 校验
     val cos = CheckedOutputStream(FileOutputStream(
             zip), CRC32())
     val zos = ZipOutputStream(cos)
+
     // 压缩文件
     compress(dir, zos, "")
     zos.flush()
@@ -284,9 +286,11 @@ private fun compress(srcFile: File, zos: ZipOutputStream, basePath: String) {
 private fun compressFile(file: File, zos: ZipOutputStream, dir: String) {
     // 拼接完整的文件路径名称
     val fullName = dir + file.name
-    // 需要去掉temp
+
+    // app/build/outputs/apk/debug/unZipFile 路径
     val fileNames = fullName.split("/").toTypedArray()
-    // 正确的文件目录名 (去掉了temp)
+
+    // 正确的文件目录名
     val sb = StringBuffer()
     if (fileNames.size > 1) {
         for (i in 1 until fileNames.size) {
@@ -296,10 +300,12 @@ private fun compressFile(file: File, zos: ZipOutputStream, dir: String) {
     } else {
         sb.append("/")
     }
-    //添加一个zip条目
+
+    // 添加 zip 条目
     val entry = ZipEntry(sb.substring(1))
     zos.putNextEntry(entry)
-    //读取条目输出到zip中
+
+    // 读取 zip 条目输出到文件中
     val fis = FileInputStream(file)
     var len: Int
     val data = ByteArray(2048)
