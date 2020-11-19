@@ -2,16 +2,21 @@ package kim.hsl.multiple_dex_tools
 
 import java.io.File
 import java.io.FileOutputStream
+import java.io.RandomAccessFile
 import java.util.zip.ZipFile
 import javax.crypto.Cipher
 import javax.crypto.spec.SecretKeySpec
 
 class AES {
 
-    /**
-     * 加密密钥, 16 字节
-     */
-    val DEFAULT_PWD = "kimhslmultiplede"
+    // Kotlin 类中的静态变量
+    companion object{
+        /**
+         * 加密密钥, 16 字节
+         */
+        val DEFAULT_PWD = "kimhslmultiplede"
+    }
+
 
     /**
      * 加密解密算法类型
@@ -49,7 +54,7 @@ class AES {
     /**
      * 加密操作
      */
-    fun encrypt(contet : ByteArray) : ByteArray{
+    fun encrypt(contet: ByteArray) : ByteArray{
         var result : ByteArray = encryptCipher.doFinal(contet)
         return  result
     }
@@ -57,7 +62,7 @@ class AES {
     /**
      * 解密操作
      */
-    fun decrypt(contet : ByteArray) : ByteArray{
+    fun decrypt(contet: ByteArray) : ByteArray{
         var result : ByteArray = decryptCipher.doFinal(contet)
         return  result
     }
@@ -65,6 +70,7 @@ class AES {
 }
 
 
+@ExperimentalStdlibApi
 fun main() {
     /*
         1 . 生成 dex 文件 , 该 dex 文件中只包含解密 其它 dex 的功能
@@ -89,7 +95,7 @@ fun main() {
     // 创建解压目录
     var aarUnzip = File("multiple-dex-tools/aarUnzip")
     // 解压操作
-    unZipAar(aarFile, aarUnzip)
+    unZip(aarFile, aarUnzip)
 
     // 拿到 multiple-dex-core-debug.aar 中解压出来的 classes.jar 文件
     var classesJarFile = File(aarUnzip, "classes.jar")
@@ -113,11 +119,51 @@ fun main() {
     // 执行结果提示
     if(process.exitValue() == 0){
         println("执行成功");
-    }else{
+    } else {
         println("执行失败");
     }
 
-    // 00:11:54
+
+    /*
+        2 . 加密 apk 中的 dex 文件
+     */
+
+    // 解压 apk 文件 , 获取所有的 dex 文件
+
+    // 被解压的 apk 文件
+    var apkFile = File("app/build/outputs/apk/debug/app-debug.apk")
+    // 解压的目标文件夹
+    var apkUnZipFile = File("app/build/outputs/apk/debug/unZipFile")
+
+    // 从被解压的 apk 文件中找到所有的 dex 文件, 小项目只有 1 个, 大项目可能有多个
+    // 使用文件过滤器获取后缀是 .dex 的文件
+    var dexFiles : Array<File> = apkUnZipFile.listFiles({ file: File, s: String ->
+        s.endsWith(".dex")
+    })
+
+    // 加密找到的 dex 文件
+    var aes = AES(AES.DEFAULT_PWD)
+    // 遍历 dex 文件
+    for(dexFile: File in dexFiles){
+        // 读取文件数据
+        var bytes = getBytes(dexFile)
+        // 加密文件数据
+        var encryptedBytes = aes.encrypt(bytes)
+
+        // 将加密后的数据写出到指定目录
+        var outputFile = File(apkUnZipFile, "secret-${dexFile.name}")
+        // 创建对应输出流
+        var fileOutputStream = FileOutputStream(outputFile)
+
+        // 将加密后的 dex 文件写出, 然后刷写 , 关闭该输出流
+        fileOutputStream.write(encryptedBytes)
+        fileOutputStream.flush()
+        fileOutputStream.close()
+
+        // 删除原来的文件
+        dexFile.delete()
+    }
+
 
 }
 
@@ -140,7 +186,7 @@ private fun deleteFile(file: File) {
  * @param zip 被解压的压缩包文件
  * @param dir 解压后的文件存放目录
  */
-fun unZipAar(zip: File, dir: File) {
+fun unZip(zip: File, dir: File) {
     try {
         // 如果存放文件目录存在, 删除该目录
         deleteFile(dir)
@@ -184,4 +230,20 @@ fun unZipAar(zip: File, dir: File) {
     } catch (e: Exception) {
         e.printStackTrace()
     }
+}
+
+
+/**
+ * 读取文件到数组中
+ */
+fun getBytes(file: File): ByteArray {
+    // 创建随机方位文件对象
+    val randomAccessFile = RandomAccessFile(file, "r")
+    // 获取文件大小 , 并创建同样大小的数据组
+    val buffer = ByteArray(randomAccessFile.length().toInt())
+    // 读取真个文件到数组中
+    randomAccessFile.readFully(buffer)
+    // 关闭文件
+    randomAccessFile.close()
+    return buffer
 }
