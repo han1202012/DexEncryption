@@ -135,6 +135,9 @@ fun main() {
     // 解压的目标文件夹
     var apkUnZipFile = File("app/build/outputs/apk/debug/unZipFile")
 
+    // 解压文件
+    unZip(apkFile, apkUnZipFile)
+
     // 从被解压的 apk 文件中找到所有的 dex 文件, 小项目只有 1 个, 大项目可能有多个
     // 使用文件过滤器获取后缀是 .dex 的文件
     var dexFiles : Array<File> = apkUnZipFile.listFiles({ file: File, s: String ->
@@ -163,6 +166,17 @@ fun main() {
         // 删除原来的文件
         dexFile.delete()
     }
+
+
+    /*
+        3 . 将代理 Application 中的 classes.dex 解压到上述
+            app/build/outputs/apk/debug/unZipFile 目录中
+     */
+    // 拷贝文件到 app/build/outputs/apk/debug/unZipFile 目录中
+    classesDexFile.renameTo(File(apkUnZipFile, "classes.dex"))
+
+    // 压缩打包 , 该压缩包是未签名的压缩包
+    var unSignedApk = File("app/build/outputs/apk/debug/app-unsigned.apk")
 
 
 }
