@@ -94,16 +94,30 @@ fun main() {
     // 拿到 multiple-dex-core-debug.aar 中解压出来的 classes.jar 文件
     var classesJarFile = File(aarUnzip, "classes.jar")
 
+    // 创建转换后的 dex 目的文件, 下面会开始创建该 dex 文件
+    var classesDexFile = File(aarUnzip, "classes.dex")
+
+    // 打印要执行的命令
+    println("cmd /c D:/001_Programs/001_Android/002_Sdk/Sdk/build-tools/30.0.2/dx.bat --dex --output ${classesDexFile.absolutePath} ${classesJarFile.absolutePath}")
+
     /*
         将 jar 包变成 dex 文件 
         使用 dx 工具命令
-        00:08:44
+
+        注意 : Windows 命令行命令之前需要加上 "cmd /c " 信息 , Linux 与 MAC 命令行不用添加
      */
-    Runtime.getRuntime().exec("")
+    var process = Runtime.getRuntime().exec("cmd /c D:/001_Programs/001_Android/002_Sdk/Sdk/build-tools/30.0.2/dx.bat --dex --output ${classesDexFile.absolutePath} ${classesJarFile.absolutePath}")
+    // 等待上述命令执行完毕
+    process.waitFor()
 
+    // 执行结果提示
+    if(process.exitValue() == 0){
+        println("执行成功");
+    }else{
+        println("执行失败");
+    }
 
-
-
+    // 00:11:54
 
 }
 
