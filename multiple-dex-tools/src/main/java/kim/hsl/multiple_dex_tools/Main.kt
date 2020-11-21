@@ -1,9 +1,6 @@
 package kim.hsl.multiple_dex_tools
 
-import java.io.File
-import java.io.FileInputStream
-import java.io.FileOutputStream
-import java.io.RandomAccessFile
+import java.io.*
 import java.util.zip.*
 
 @ExperimentalStdlibApi
@@ -141,6 +138,50 @@ fun main() {
         println("对齐操作 执行成功");
     } else {
         println("对齐操作 执行失败");
+    }
+
+
+
+    /*
+        5 . 签名操作
+     */
+    // 签名 apk 输出结果, 将 app-unsigned-aligned.apk 签名, 签名后的文件输出到 app-signed-aligned.apk 中
+    var signedAlignApk = File("app/build/outputs/apk/debug/app-signed-aligned.apk")
+
+    // 获取签名 jks 文件
+    var jksFile = File("dex.jks")
+
+    // 打印要执行的命令
+    println("cmd /c D:/001_Programs/001_Android/002_Sdk/Sdk/build-tools/30.0.2/apksigner sign --ks ${jksFile.absolutePath} --ks-key-alias Key0 --ks-pass pass:000000 --key-pass pass:000000 --out ${signedAlignApk.absolutePath} ${unSignedAlignApk.absolutePath}")
+
+    /*
+        将 app-unsigned.apk 对齐
+        使用 zipalign 工具命令
+
+        注意 : Windows 命令行命令之前需要加上 "cmd /c " 信息 , Linux 与 MAC 命令行不用添加
+     */
+    process = Runtime.getRuntime().exec("cmd /c D:/001_Programs/001_Android/002_Sdk/Sdk/build-tools/30.0.2/apksigner sign --ks ${jksFile.absolutePath} --ks-key-alias Key0 --ks-pass pass:000000 --key-pass pass:000000 --out ${signedAlignApk.absolutePath} ${unSignedAlignApk.absolutePath}")
+
+    // 打印错误日志
+    var br = BufferedReader(InputStreamReader(process.errorStream))
+    while ( true ){
+        var line = br.readLine()
+        if(line == null){
+            break
+        }else{
+            println(line)
+        }
+    }
+    br.close()
+
+    // 等待上述命令执行完毕
+    process.waitFor()
+
+    // 执行结果提示
+    if(process.exitValue() == 0){
+        println("签名操作 执行成功");
+    } else {
+        println("签名操作 执行失败");
     }
 
 
