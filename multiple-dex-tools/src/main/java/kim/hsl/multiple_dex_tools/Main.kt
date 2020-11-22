@@ -3,6 +3,13 @@ package kim.hsl.multiple_dex_tools
 import java.io.*
 import java.util.zip.*
 
+/**
+ * 此处配置 SDK 根目录绝对路径
+ * D:/001_Programs/001_Android/002_Sdk/Sdk/
+ * Y:/001_DevelopTools/002_Android_SDK/
+ */
+val sdkDirectory = "Y:/001_DevelopTools/002_Android_SDK/"
+
 @ExperimentalStdlibApi
 fun main() {
     /*
@@ -37,7 +44,7 @@ fun main() {
     var classesDexFile = File(aarUnzip, "classes.dex")
 
     // 打印要执行的命令
-    println("cmd /c D:/001_Programs/001_Android/002_Sdk/Sdk/build-tools/30.0.2/dx.bat --dex --output ${classesDexFile.absolutePath} ${classesJarFile.absolutePath}")
+    println("cmd /c ${sdkDirectory}build-tools/30.0.2/dx.bat --dex --output ${classesDexFile.absolutePath} ${classesJarFile.absolutePath}")
 
     /*
         将 jar 包变成 dex 文件
@@ -45,7 +52,7 @@ fun main() {
 
         注意 : Windows 命令行命令之前需要加上 "cmd /c " 信息 , Linux 与 MAC 命令行不用添加
      */
-    var process = Runtime.getRuntime().exec("cmd /c D:/001_Programs/001_Android/002_Sdk/Sdk/build-tools/30.0.2/dx.bat --dex --output ${classesDexFile.absolutePath} ${classesJarFile.absolutePath}")
+    var process = Runtime.getRuntime().exec("cmd /c ${sdkDirectory}build-tools/30.0.2/dx.bat --dex --output ${classesDexFile.absolutePath} ${classesJarFile.absolutePath}")
     // 等待上述命令执行完毕
     process.waitFor()
 
@@ -121,7 +128,7 @@ fun main() {
     var unSignedAlignApk = File("app/build/outputs/apk/debug/app-unsigned-aligned.apk")
 
     // 打印要执行的命令
-    println("cmd /c D:/001_Programs/001_Android/002_Sdk/Sdk/build-tools/30.0.2/zipalign -f 4 ${unSignedApk.absolutePath} ${unSignedAlignApk.absolutePath}")
+    println("cmd /c ${sdkDirectory}build-tools/30.0.2/zipalign -f 4 ${unSignedApk.absolutePath} ${unSignedAlignApk.absolutePath}")
 
     /*
         将 app-unsigned.apk 对齐
@@ -129,7 +136,7 @@ fun main() {
 
         注意 : Windows 命令行命令之前需要加上 "cmd /c " 信息 , Linux 与 MAC 命令行不用添加
      */
-    process = Runtime.getRuntime().exec("cmd /c D:/001_Programs/001_Android/002_Sdk/Sdk/build-tools/30.0.2/zipalign -f 4 ${unSignedApk.absolutePath} ${unSignedAlignApk.absolutePath}")
+    process = Runtime.getRuntime().exec("cmd /c ${sdkDirectory}build-tools/30.0.2/zipalign -f 4 ${unSignedApk.absolutePath} ${unSignedAlignApk.absolutePath}")
     // 等待上述命令执行完毕
     process.waitFor()
 
@@ -152,7 +159,7 @@ fun main() {
     var jksFile = File("dex.jks")
 
     // 打印要执行的命令
-    println("cmd /c D:/001_Programs/001_Android/002_Sdk/Sdk/build-tools/30.0.2/apksigner sign --ks ${jksFile.absolutePath} --ks-key-alias Key0 --ks-pass pass:000000 --key-pass pass:000000 --out ${signedAlignApk.absolutePath} ${unSignedAlignApk.absolutePath}")
+    println("cmd /c ${sdkDirectory}build-tools/30.0.2/apksigner sign --ks ${jksFile.absolutePath} --ks-key-alias Key0 --ks-pass pass:000000 --key-pass pass:000000 --out ${signedAlignApk.absolutePath} ${unSignedAlignApk.absolutePath}")
 
     /*
         将 app-unsigned.apk 对齐
@@ -160,7 +167,7 @@ fun main() {
 
         注意 : Windows 命令行命令之前需要加上 "cmd /c " 信息 , Linux 与 MAC 命令行不用添加
      */
-    process = Runtime.getRuntime().exec("cmd /c D:/001_Programs/001_Android/002_Sdk/Sdk/build-tools/30.0.2/apksigner sign --ks ${jksFile.absolutePath} --ks-key-alias Key0 --ks-pass pass:000000 --key-pass pass:000000 --out ${signedAlignApk.absolutePath} ${unSignedAlignApk.absolutePath}")
+    process = Runtime.getRuntime().exec("cmd /c ${sdkDirectory}build-tools/30.0.2/apksigner sign --ks ${jksFile.absolutePath} --ks-key-alias Key0 --ks-pass pass:000000 --key-pass pass:000000 --out ${signedAlignApk.absolutePath} ${unSignedAlignApk.absolutePath}")
 
     // 打印错误日志
     var br = BufferedReader(InputStreamReader(process.errorStream))
