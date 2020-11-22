@@ -14,6 +14,21 @@ android {
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles 'consumer-rules.pro'
+
+        externalNativeBuild{
+            cmake{
+                // 配置要编译动态库的 CPU 架构, 这里编译 arm 和 x86 两个版本的动态库
+                abiFilters 'armeabi','x86'
+            }
+        }
+    }
+
+    externalNativeBuild{
+        cmake{
+            // 配置编译的 CMake 脚本位置, 默认当前目录是 app 目录
+            // build.gradle 构建脚本所在目录
+            path 'src/main/cpp/CMakeLists.txt'
+        }
     }
 
     buildTypes {
