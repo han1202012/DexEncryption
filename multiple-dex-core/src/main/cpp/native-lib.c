@@ -10,6 +10,10 @@ static uint8_t *userkey = "abcdefghijklmnop";
 
 #define LOGI(...) __android_log_print(ANDROID_LOG_INFO, "NDK", __VA_ARGS__)
 
+JNIEXPORT void JNICALL
+Java_kim_hsl_multipledex_OpenSSL_decrypt(JNIEnv *env, jclass clazz, jbyteArray data, jstring path) {
+
+}
 
 /*
 JNIEXPORT void JNICALL
