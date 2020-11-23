@@ -22,5 +22,10 @@ public class OpenSSL {
         return buffer;
     }
 
+    /**
+     * 调用 OpenSSL 解密 dex 文件
+     * @param data
+     * @param path
+     */
     public static native void decrypt(byte[] data, String path);
 }
