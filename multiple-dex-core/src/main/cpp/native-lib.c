@@ -13,6 +13,62 @@ static uint8_t *userkey = "abcdefghijklmnop";
 JNIEXPORT void JNICALL
 Java_kim_hsl_multipledex_OpenSSL_decrypt(JNIEnv *env, jclass clazz, jbyteArray data, jstring path) {
 
+    // 将 Java Byte 数组转为 C 数组
+    jbyte *src = (*env)->GetByteArrayElements(env, data, NULL);
+    // 将 Java String 字符串转为 C char* 字符串
+    const char *filePath = (*env)->GetStringUTFChars(env, path, 0);
+    // 获取 Java Byte 数组长度
+    int srcLen = (*env)->GetArrayLength(env, data);
+
+    /*
+     * 下面的代码是从 OpenSSL 源码跟目录下 demos/evp/aesccm.c 中拷贝并修改
+     */
+
+    // 加密解密的上下文
+    EVP_CIPHER_CTX *ctx;
+    int outlen, tmplen, rv;
+    unsigned char outbuf[1024];
+
+    // 创建加密解密上下文
+    ctx = EVP_CIPHER_CTX_new();
+
+    /* Select cipher 配置上下文解码参数
+     * 配置加密模式 :
+     * Java 中的加密算法类型 "AES/ECB/PKCS5Padding" , 使用 ecb 模式
+     * EVP_aes_192_ecb() 配置 ecb 模式
+     * AES 有五种加密模式 : CBC、ECB、CTR、OCF、CFB
+     * 配置密钥 :
+     * Java 中定义的密钥是 "kimhslmultiplede"
+     */
+    EVP_DecryptInit_ex(ctx, EVP_aes_192_ecb(), NULL, "kimhslmultiplede", NULL);
+
+
+    /* Set ciphertext length: only needed if we have AAD */
+    /*
+     * 解密操作
+     * int EVP_DecryptUpdate(EVP_CIPHER_CTX *ctx, unsigned char *out,
+                                 int *outl, const unsigned char *in, int inl);
+     * 解密 inl 长度的 in , 解密为 outl 长度的 out
+     * 01:00:51
+     */
+    EVP_DecryptUpdate(ctx, NULL, &outlen, NULL, sizeof(ccm_ct));
+    /* Zero or one call to specify any AAD */
+    EVP_DecryptUpdate(ctx, NULL, &outlen, ccm_adata, sizeof(ccm_adata));
+    /* Decrypt plaintext, verify tag: can only be called once */
+    rv = EVP_DecryptUpdate(ctx, outbuf, &outlen, ccm_ct, sizeof(ccm_ct));
+    /* Output decrypted block: if tag verify failed we get nothing */
+    if (rv > 0) {
+        printf("Plaintext:\n");
+        BIO_dump_fp(stdout, outbuf, outlen);
+    } else
+        printf("Plaintext not available: tag verify failed.\n");
+    EVP_CIPHER_CTX_free(ctx);
+
+
+    // 释放 Java 引用
+    (*env)->ReleaseByteArrayElements(env, data, src, 0);
+    (*env)->ReleaseStringUTFChars(env, path, path);
+
 }
 
 /*
