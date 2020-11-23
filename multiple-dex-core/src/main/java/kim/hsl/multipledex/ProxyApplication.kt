@@ -108,10 +108,10 @@ class ProxyApplication : Application() {
 
                     // 获取该文件的二进制 Byte 数据
                     // 这些 Byte 数组就是加密后的 dex 数据
-                    var bytes = Utils.getBytes(file)
+                    var bytes = OpenSSL.getBytes(file)
 
                     // 解密该二进制数据, 并替换原来的加密 dex, 直接覆盖原来的文件即可
-                    Utils.decrypt(bytes, file.absolutePath)
+                    OpenSSL.decrypt(bytes, file.absolutePath)
 
                     // 将解密完毕的 dex 文件放在需要加载的 dex 集合中
                     dexFiles.add(file)
