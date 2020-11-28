@@ -8,7 +8,7 @@ import java.util.zip.*
  * D:/001_Programs/001_Android/002_Sdk/Sdk/
  * Y:/001_DevelopTools/002_Android_SDK/
  */
-val sdkDirectory = "D:/001_Programs/001_Android/002_Sdk/Sdk/"
+val sdkDirectory = "Y:/001_DevelopTools/002_Android_SDK/"
 
 @ExperimentalStdlibApi
 fun main() {
