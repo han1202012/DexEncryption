@@ -18,7 +18,9 @@ import java.util.Arrays;
 public class Utils {
 
     static {
+        Log.i("ProxyApplication", "System.loadLibrary Start");
         System.loadLibrary("dn_ssl");
+        Log.i("ProxyApplication", "System.loadLibrary Over");
     }
 
     public static native void decrypt(byte[] data, String path);
