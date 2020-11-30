@@ -3,7 +3,7 @@
     package="kim.hsl.dex">
 
     <application
-        android:name="kim.hsl.multipledex.ProxyApplication"
+        android:name="com.dongnao.proxy.guard.core.ProxyApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -12,8 +12,13 @@
         android:theme="@style/AppTheme">
 
         <!-- app_name 值是该应用的 Application 的真实全类名 -->
-        <meta-data android:name="app_name" android:value="kim.hsl.multipledex.ProxyApplication"/>
+        <!--<meta-data android:name="app_name" android:value="kim.hsl.multipledex.ProxyApplication"/>-->
         <!-- DEX 解密之后的目录名称 -->
+        <!--<meta-data android:name="app_version" android:value="\1.0"/>-->
+
+        <!-- 为了我们之后的替换 (真实的Application全类名) -->
+        <meta-data android:name="app_name" android:value="kim.hsl.dex.MyApplication"/>
+        <!-- 一个版本标识 用于dex解密后的目录名 -->
         <meta-data android:name="app_version" android:value="\1.0"/>
 
         <activity android:name=".MainActivity">

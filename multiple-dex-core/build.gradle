@@ -22,6 +22,14 @@ android {
                 abiFilters 'armeabi-v7a'
             }
         }
+
+        //配置 APK 打包 哪些动态库
+        //  示例 : 如在工程中集成了第三方库 , 其提供了 arm, x86, mips 等指令集的动态库
+        //        那么为了控制打包后的应用大小, 可以选择性打包一些库 , 此处就是进行该配置
+        ndk{
+            // 打包生成的 APK 文件指挥包含 ARM 指令集的动态库
+            //abiFilters "armeabi-v7a"
+        }
     }
 
     externalNativeBuild{

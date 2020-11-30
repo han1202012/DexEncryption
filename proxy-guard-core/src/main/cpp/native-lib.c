@@ -4,14 +4,17 @@
 #include <malloc.h>
 #include <string.h>
 #include <openssl/evp.h>
-//#include "logging_macros.h"
 
 //密钥
-static uint8_t *userkey = "abcdefghijklmnop";
+//static uint8_t *userkey = "abcdefghijklmnop";
+static uint8_t *userkey = "kimhslmultiplede";
+
+#define LOGI(...) __android_log_print(ANDROID_LOG_INFO, "NDK", __VA_ARGS__)
+
 
 JNIEXPORT void JNICALL
-Java_kim_hsl_multipledex_Utils_decrypt(JNIEnv *env, jobject instance, jbyteArray encrypt_, jstring path_) {
-
+Java_com_dongnao_proxy_guard_core_Utils_decrypt(JNIEnv *env, jobject instance,
+                                                jbyteArray encrypt_, jstring path_) {
     jbyte *src = (*env)->GetByteArrayElements(env, encrypt_, NULL);
     const char *path = (*env)->GetStringUTFChars(env, path_, 0);
     int src_len = (*env)->GetArrayLength(env, encrypt_);
