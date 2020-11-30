@@ -19,7 +19,7 @@ android {
             cmake{
                 // 配置要编译动态库的 CPU 架构, 这里编译 arm 和 x86 两个版本的动态库
                 // arm64-v8a, armeabi-v7a, x86, x86_64
-                abiFilters 'armeabi-v7a','x86'
+                abiFilters 'armeabi-v7a'
             }
         }
     }
@@ -28,7 +28,8 @@ android {
         cmake{
             // 配置编译的 CMake 脚本位置, 默认当前目录是 app 目录
             // build.gradle 构建脚本所在目录
-            path 'src/main/cpp/CMakeLists.txt'
+            //path 'src/main/cpp/CMakeLists.txt'
+            path 'CMakeLists.txt'
         }
     }
 

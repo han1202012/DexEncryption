@@ -7,14 +7,15 @@
 #include "logging_macros.h"
 
 //密钥
-static uint8_t *userkey = "abcdefghijklmnop";
+static uint8_t *userkey = (uint8_t *) "abcdefghijklmnop";
 
+extern "C"
 JNIEXPORT void JNICALL
-Java_kim_hsl_multipledex_Utils_decrypt(JNIEnv *env, jobject instance, jbyteArray encrypt_, jstring path_) {
+Java_kim_hsl_multipledex_OpenSSL_decrypt(JNIEnv *env, jclass clazz, jbyteArray encrypt_, jstring path_) {
 
-    jbyte *src = (*env)->GetByteArrayElements(env, encrypt_, NULL);
-    const char *path = (*env)->GetStringUTFChars(env, path_, 0);
-    int src_len = (*env)->GetArrayLength(env, encrypt_);
+    jbyte *src = (env)->GetByteArrayElements(encrypt_, NULL);
+    const char *path = (env)->GetStringUTFChars(path_, 0);
+    int src_len = (env)->GetArrayLength( encrypt_);
 
     //解密
     //加解密的 上下文
@@ -25,12 +26,12 @@ Java_kim_hsl_multipledex_Utils_decrypt(JNIEnv *env, jobject instance, jbyteArray
     EVP_DecryptInit_ex(ctx, EVP_aes_128_ecb(), NULL, userkey, NULL);
 
     //密文比明文长，所以肯定能保存下所有的明文
-    uint8_t *out = malloc(src_len);
+    uint8_t *out = static_cast<uint8_t *>(malloc(src_len));
     //数据置空
     memset(out, 0, src_len);
     int len;
     //解密   abcdefg  z    z
-    EVP_DecryptUpdate(ctx, out, &outlen, src, src_len);
+    EVP_DecryptUpdate(ctx, out, &outlen, reinterpret_cast<const unsigned char *>(src), src_len);
     len = outlen;
     //解密剩余的所有数据 校验
     EVP_DecryptFinal_ex(ctx, out + outlen, &outlen);
@@ -42,7 +43,7 @@ Java_kim_hsl_multipledex_Utils_decrypt(JNIEnv *env, jobject instance, jbyteArray
     fwrite(out, len, 1, f);
     fclose(f);
     free(out);
-    (*env)->ReleaseByteArrayElements(env, encrypt_, src, 0);
-    (*env)->ReleaseStringUTFChars(env, path_, path);
+    (env)->ReleaseByteArrayElements(encrypt_, src, 0);
+    (env)->ReleaseStringUTFChars(path_, path);
 
 }

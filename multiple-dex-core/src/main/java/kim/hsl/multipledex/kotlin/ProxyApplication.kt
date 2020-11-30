@@ -1,4 +1,4 @@
-package kim.hsl.multipledex
+package kim.hsl.multipledex.kotlin
 
 import android.app.Application
 import android.content.Context
@@ -7,15 +7,18 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.text.TextUtils
+import android.util.Log
+import kim.hsl.multipledex.OpenSSL
+import kim.hsl.multipledex.reflexField
+import kim.hsl.multipledex.reflexMethod
+import kim.hsl.multipledex.unZipApk
 import java.io.File
-import java.io.FileOutputStream
 import java.io.IOException
-import java.lang.reflect.Field
 import java.lang.reflect.Method
-import java.util.zip.ZipFile
 
 
 class ProxyApplication : Application() {
+    val TAG = "ProxyApplication"
 
     /**
      * 应用真实的 Application 全类名
@@ -34,6 +37,7 @@ class ProxyApplication : Application() {
      */
     override fun attachBaseContext(base: Context?) {
         super.attachBaseContext(base)
+        Log.i(TAG, "attachBaseContext")
 
         /*
             在该 Application 中主要进行两个操作 :
@@ -74,6 +78,8 @@ class ProxyApplication : Application() {
 
         // 创建用户的私有目录 , 将 apk 文件解压到该目录中
         var privateDir : File = getDir("${app_name}_${app_version}", MODE_PRIVATE)
+
+        Log.i(TAG, "attachBaseContext 创建用户的私有目录 : ${privateDir.absolutePath}")
 
         // 在上述目录下创建 app 目录
         // 创建该目录的目的是存放解压后的 apk 文件的
@@ -126,9 +132,15 @@ class ProxyApplication : Application() {
             }
         }
 
+        Log.i(TAG, "attachBaseContext 解密完成")
+
         // 截止到此处 , 已经拿到了解密完毕 , 需要加载的 dex 文件
         // 加载自己解密的 dex 文件
         loadDex(dexFiles, privateDir)
+
+        Log.i(TAG, "attachBaseContext 完成")
+
+
     }
 
     /**
@@ -142,7 +154,7 @@ class ProxyApplication : Application() {
      * 00:17:07
      */
     fun loadDex(dexFiles : ArrayList<File>, optimizedDirectory : File) : Unit{
-
+        Log.i(TAG, "loadDex")
         /*
             需要执行的步骤
             1 . 获得系统 DexPathList 中的 Element[] dexElements 数组
@@ -235,6 +247,8 @@ class ProxyApplication : Application() {
 
          */
         dexElementsField.set(pathList, newElements)
+
+        Log.i(TAG, "loadDex 完成")
 
     }
 
