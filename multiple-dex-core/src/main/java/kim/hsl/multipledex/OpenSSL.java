@@ -5,7 +5,7 @@ import java.io.RandomAccessFile;
 
 public class OpenSSL {
     static {
-        System.loadLibrary("dn_ssl");
+        System.loadLibrary("openssl");
     }
 
     /**

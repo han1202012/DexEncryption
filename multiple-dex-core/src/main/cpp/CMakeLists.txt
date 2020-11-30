@@ -4,7 +4,11 @@ cmake_minimum_required(VERSION 3.4.1)
 add_library(
         openssl
         SHARED
-        native-lib.c )
+        native-lib2.c )
+
+find_library(
+        log-lib
+        log)
 
 # 设置 openssl 函数库的静态库地址 方式一 报错
 set(LIB_DIR ${CMAKE_SOURCE_DIR}/lib/${ANDROID_ABI})
@@ -42,4 +46,5 @@ include_directories(${CMAKE_SOURCE_DIR}/include)
 target_link_libraries(
         openssl
         crypto
-        log)
+        android
+        ${log-lib})

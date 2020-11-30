@@ -121,10 +121,10 @@ public class ProxyApplication extends Application {
 
                         // 获取该文件的二进制 Byte 数据
                         // 这些 Byte 数组就是加密后的 dex 数据
-                        byte[] bytes = Utils.getBytes(file);
+                        byte[] bytes = OpenSSL.getBytes(file);
 
                         // 解密该二进制数据, 并替换原来的加密 dex, 直接覆盖原来的文件即可
-                        Utils.decrypt(bytes, file.getAbsolutePath());
+                        OpenSSL.decrypt(bytes, file.getAbsolutePath());
 
                         // 将解密完毕的 dex 文件放在需要加载的 dex 集合中
                         dexFiles.add(file);
@@ -161,7 +161,6 @@ public class ProxyApplication extends Application {
      * 创建自己的 Element[] dexElements 数组
      * ( libcore/dalvik/src/main/java/dalvik/system/DexPathList.java )
      * 然后将 系统加载的 Element[] dexElements 数组 与 我们自己的 Element[] dexElements 数组进行合并操作
-     * 00:17:07
      */
     void loadDex(ArrayList<File> dexFiles, File optimizedDirectory) throws IllegalAccessException, InvocationTargetException {
         Log.i(TAG, "loadDex");
