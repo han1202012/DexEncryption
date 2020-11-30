@@ -1,16 +1,16 @@
 #include <jni.h>
 #include <stdio.h>
-#include <android/log.h>
+//#include <android/log.h>
 #include <malloc.h>
 #include <string.h>
 #include <openssl/evp.h>
-#include "logging_macros.h"
+//#include "logging_macros.h"
 
 //密钥
 static uint8_t *userkey = "abcdefghijklmnop";
 
 JNIEXPORT void JNICALL
-Java_kim_hsl_multipledex_OpenSSL_decrypt(JNIEnv *env, jclass clazz, jbyteArray data, jstring path) {
+Java_kim_hsl_multipledex_OpenSSL_decrypt(JNIEnv *env, jobject instance, jbyteArray data, jstring path) {
 
     // 将 Java Byte 数组转为 C 数组
     jbyte *src = (*env)->GetByteArrayElements(env, data, NULL);
