@@ -1,6 +1,3 @@
-include ':mylibrary'
-include ':multiple-dex-core3'
-include ':multiple-dex-core2'
 rootProject.name='DexEncryption'
 include ':app'
 include ':multiple-dex-core'

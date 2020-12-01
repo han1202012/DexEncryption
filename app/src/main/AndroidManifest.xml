@@ -11,7 +11,9 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
-        <!-- app_name 值是该应用的 Application 的真实全类名 -->
+        <!-- app_name 值是该应用的 Application 的真实全类名
+            真实 Application : kim.hsl.dex.MyApplication
+            代理 Application : kim.hsl.multipledex.ProxyApplication -->
         <meta-data android:name="app_name" android:value="kim.hsl.dex.MyApplication"/>
         <!-- DEX 解密之后的目录名称版本号 , 完整目录名称为 :
                 kim.hsl.dex.MyApplication_1.0 -->
