@@ -12,13 +12,9 @@
         android:theme="@style/AppTheme">
 
         <!-- app_name 值是该应用的 Application 的真实全类名 -->
-        <!--<meta-data android:name="app_name" android:value="kim.hsl.multipledex.ProxyApplication"/>-->
-        <!-- DEX 解密之后的目录名称 -->
-        <!--<meta-data android:name="app_version" android:value="\1.0"/>-->
-
-        <!-- 为了我们之后的替换 (真实的Application全类名) -->
         <meta-data android:name="app_name" android:value="kim.hsl.dex.MyApplication"/>
-        <!-- 一个版本标识 用于dex解密后的目录名 -->
+        <!-- DEX 解密之后的目录名称版本号 , 完整目录名称为 :
+                kim.hsl.dex.MyApplication_1.0 -->
         <meta-data android:name="app_version" android:value="\1.0"/>
 
         <activity android:name=".MainActivity">
