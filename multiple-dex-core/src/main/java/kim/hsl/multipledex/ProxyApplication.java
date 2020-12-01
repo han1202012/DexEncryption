@@ -42,20 +42,20 @@ public class ProxyApplication extends Application {
         try {
             Log.i(TAG, "attachBaseContext");
 
-        /*
-            在该 Application 中主要进行两个操作 :
-            1 . 解密并加载多个 DEX 文件
-            2 . 将真实的 Application 替换成应用的主 Application
-         */
+            /*
+                在该 Application 中主要进行两个操作 :
+                1 . 解密并加载多个 DEX 文件
+                2 . 将真实的 Application 替换成应用的主 Application
+             */
 
 
-        /*
-            I . 解密与加载多 DEX 文件
-                先进行解密, 然后再加载解密之后的 DEX 文件
+            /*
+                I . 解密与加载多 DEX 文件
+                    先进行解密, 然后再加载解密之后的 DEX 文件
 
-                1. 先获取当前的 APK 文件
-                2. 然后解压该 APK 文件
-         */
+                    1. 先获取当前的 APK 文件
+                    2. 然后解压该 APK 文件
+             */
 
             // 获取当前的 APK 文件, 下面的 getApplicationInfo().sourceDir 就是本应用 APK 安装文件的全路径
             File apkFile = new File(getApplicationInfo().sourceDir);
