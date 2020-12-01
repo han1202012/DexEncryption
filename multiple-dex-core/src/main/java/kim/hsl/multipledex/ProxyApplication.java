@@ -139,7 +139,11 @@ public class ProxyApplication extends Application {
                 }
             }
 
-            Log.i(TAG, "attachBaseContext 解密完成");
+            Log.i(TAG, "attachBaseContext 解密完成 dexFiles : " + dexFiles);
+
+            for(int i = 0; i < dexFiles.size(); i ++){
+                Log.i(TAG, i + " . " + dexFiles.get(i).getAbsolutePath());
+            }
 
             // 截止到此处 , 已经拿到了解密完毕 , 需要加载的 dex 文件
             // 加载自己解密的 dex 文件
@@ -162,7 +166,12 @@ public class ProxyApplication extends Application {
      * ( libcore/dalvik/src/main/java/dalvik/system/DexPathList.java )
      * 然后将 系统加载的 Element[] dexElements 数组 与 我们自己的 Element[] dexElements 数组进行合并操作
      */
-    void loadDex(ArrayList<File> dexFiles, File optimizedDirectory) throws IllegalAccessException, InvocationTargetException {
+    void loadDex(ArrayList<File> dexFiles, File optimizedDirectory)
+            throws
+            IllegalAccessException,
+            InvocationTargetException,
+            NoSuchFieldException,
+            NoSuchMethodException {
         Log.i(TAG, "loadDex");
         /*
             需要执行的步骤
@@ -191,12 +200,12 @@ public class ProxyApplication extends Application {
 
         // 阶段一二 : 调用 getClassLoader() 方法可以获取 PathClassLoader 对象
         // 从 PathClassLoader 对象中获取 private final DexPathList pathList 成员
-        Field pathListField = ReflexUtilsKt.reflexField(getClassLoader(), "DexPathList");
+        Field pathListField = ReflexUtils.reflexField(getClassLoader(), "pathList");
         // 获取 classLoader 对象对应的 DexPathList pathList 成员
         Object pathList = pathListField.get(getClassLoader());
 
         //阶段三 : 获取封装在 DexPathList 类中的 Element[] dexElements 数组
-        Field dexElementsField = ReflexUtilsKt.reflexField(pathList, "dexElements");
+        Field dexElementsField = ReflexUtils.reflexField(pathList, "dexElements");
         // 获取 pathList 对象对应的 Element[] dexElements 数组成员
         Object[] dexElements = (Object[]) dexElementsField.get(pathList);
 
@@ -214,7 +223,7 @@ public class ProxyApplication extends Application {
                 Build.VERSION_CODES.LOLLIPOP_MR1) { // 5.0, 5.1  makeDexElements
 
             // 反射 5.0, 5.1, 6.0 版本的 DexPathList 中的 makeDexElements 方法
-            makeDexElements = ReflexUtilsKt.reflexMethod(
+            makeDexElements = ReflexUtils.reflexMethod(
                     pathList, "makeDexElements",
                     ArrayList.class, File.class, ArrayList.class);
             ArrayList<IOException> suppressedExceptions = new ArrayList<IOException>();
@@ -225,7 +234,7 @@ public class ProxyApplication extends Application {
         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {   // 7.0 以上版本 makePathElements
 
             // 反射 7.0 以上版本的 DexPathList 中的 makeDexElements 方法
-            makeDexElements = ReflexUtilsKt.reflexMethod(pathList, "makePathElements",
+            makeDexElements = ReflexUtils.reflexMethod(pathList, "makePathElements",
                     List.class, File.class, List.class);
             ArrayList<IOException> suppressedExceptions = new ArrayList<IOException>();
             addElements = (Object[]) makeDexElements.invoke(pathList, dexFiles,
