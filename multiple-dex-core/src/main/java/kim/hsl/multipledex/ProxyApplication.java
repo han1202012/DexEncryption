@@ -92,7 +92,7 @@ public class ProxyApplication extends Application {
             File appDir = new File(privateDir, "app");
 
             // app 中存放的是解压后的所有的 apk 文件
-            // app 下创建 dexDir 目录 , 将所有的 dex 目录移动到该 deDir 目录中
+            // app 下创建 dexDir 目录 , 将所有的 dex 目录移动到该 dexDir 目录中
             // dexDir 目录存放应用的所有 dex 文件
             // 这些 dex 文件都需要进行解密
             File dexDir = new File(appDir, "dexDir");
@@ -100,7 +100,7 @@ public class ProxyApplication extends Application {
             // 遍历解压后的 apk 文件 , 将需要加载的 dex 放入如下集合中
             ArrayList<File> dexFiles = new ArrayList<File>();
 
-            // 如果该 dexDir 存在 , 并且该目录不为空 , 并进行 MD5 文件校验
+            // 如果该 dexDir 不存在 , 或者该目录为空 , 并进行 MD5 文件校验
             if (!dexDir.exists() || dexDir.list().length == 0) {
                 // 将 apk 中的文件解压到了 appDir 目录
                 ZipUtils.unZipApk(apkFile, appDir);
@@ -109,13 +109,19 @@ public class ProxyApplication extends Application {
                 // 获取 appDir 目录下的所有文件
                 File[] files = appDir.listFiles();
 
+                Log.i(TAG, "attachBaseContext appDir 目录路径 : " + appDir.getAbsolutePath());
+                Log.i(TAG, "attachBaseContext appDir 目录内容 : " + files);
+
                 // 遍历文件名称集合
                 for (int i = 0; i < files.length; i++) {
                     File file = files[i];
+
+                    Log.i(TAG, "attachBaseContext 遍历 " + i + " . " + file);
+
                     // 如果文件后缀是 .dex , 并且不是 主 dex 文件 classes.dex
                     // 符合上述两个条件的 dex 文件放入到 dexDir 中
                     if (file.getName().endsWith(".dex") &&
-                            TextUtils.equals(file.getName(), "classes.dex")) {
+                            !TextUtils.equals(file.getName(), "classes.dex")) {
                         // 筛选出来的 dex 文件都是需要解密的
                         // 解密需要使用 OpenSSL 进行解密
 
@@ -128,6 +134,10 @@ public class ProxyApplication extends Application {
 
                         // 将解密完毕的 dex 文件放在需要加载的 dex 集合中
                         dexFiles.add(file);
+
+                        // 拷贝到 dexDir 中
+
+                        Log.i(TAG, "attachBaseContext 解密完成 被解密文件是 : " + file);
 
                     }// 判定是否是需要解密的 dex 文件
                 }// 遍历 apk 解压后的文件
