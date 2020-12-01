@@ -75,7 +75,7 @@ Java_kim_hsl_multipledex_OpenSSL_decrypt(JNIEnv *env, jobject instance, jbyteArr
     EVP_CIPHER_CTX_free(ctx);
 
     // 将解密出的明文, 写出到给定的 Java 文件中
-    FILE *file = fopen(path, "wb");
+    FILE *file = fopen(filePath, "wb");
     // 写出 out 指针指向的数据 , 写出个数 totalLen * 1 , 写出到 file 文件中
     fwrite(out, totalLen, 1, file);
     // 关闭文件

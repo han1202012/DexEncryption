@@ -1,11 +1,17 @@
 package kim.hsl.multipledex;
 
+import android.util.Log;
+
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.RandomAccessFile;
 
 public class OpenSSL {
     static {
+        Log.i("ProxyApplication", "System.loadLibrary Start");
         System.loadLibrary("openssl");
+        Log.i("ProxyApplication", "System.loadLibrary Over");
     }
 
     /**
@@ -15,11 +21,30 @@ public class OpenSSL {
      * @throws Exception
      */
     public static byte[] getBytes(File file) throws Exception {
-        RandomAccessFile r = new RandomAccessFile(file, "r");
+        /*RandomAccessFile r = new RandomAccessFile(file, "r");
         byte[] buffer = new byte[(int) r.length()];
         r.readFully(buffer);
         r.close();
-        return buffer;
+        return buffer;*/
+
+        Log.i("ProxyApplication", "getBytes");
+        try {
+            RandomAccessFile r = new RandomAccessFile(file, "r");
+            Log.i("ProxyApplication", "RandomAccessFile Over");
+            byte[] buffer = new byte[(int) r.length()];
+            r.readFully(buffer);
+            r.close();
+            Log.i("ProxyApplication", "正常返回");
+            return buffer;
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            Log.i("ProxyApplication", "FileNotFoundException");
+        } catch (IOException e) {
+            e.printStackTrace();
+            Log.i("ProxyApplication", "IOException");
+        }
+        Log.i("ProxyApplication", "null");
+        return null;
     }
 
     /**
