@@ -230,7 +230,7 @@ public class ProxyApplication extends Application {
         Object[] addElements = null;
 
         if (Build.VERSION.SDK_INT <=
-                Build.VERSION_CODES.LOLLIPOP_MR1) { // 5.0, 5.1  makeDexElements
+                Build.VERSION_CODES.M) { // 5.0, 5.1  makeDexElements
 
             // 反射 5.0, 5.1, 6.0 版本的 DexPathList 中的 makeDexElements 方法
             makeDexElements = ReflexUtils.reflexMethod(
