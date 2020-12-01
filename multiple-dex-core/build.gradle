@@ -28,7 +28,7 @@ android {
         //        那么为了控制打包后的应用大小, 可以选择性打包一些库 , 此处就是进行该配置
         ndk{
             // 打包生成的 APK 文件指挥包含 ARM 指令集的动态库
-            //abiFilters "armeabi-v7a"
+            abiFilters "armeabi-v7a"
         }
     }
 
@@ -37,7 +37,6 @@ android {
             // 配置编译的 CMake 脚本位置, 默认当前目录是 app 目录
             // build.gradle 构建脚本所在目录
             path 'src/main/cpp/CMakeLists.txt'
-            //path 'CMakeLists.txt'
         }
     }
 

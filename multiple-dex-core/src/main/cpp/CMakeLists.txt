@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.4.1)
 add_library(
         openssl
         SHARED
-        native-lib2.c )
+        native-lib.c)
 
 find_library(
         log-lib
