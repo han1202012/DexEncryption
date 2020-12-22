@@ -413,7 +413,6 @@ public class ProxyApplication extends Application {
             // 再次调用 onCreate 方法
             delegate.onCreate();
 
-
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         } catch (IllegalAccessException e) {
