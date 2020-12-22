@@ -151,7 +151,7 @@ public class ProxyApplication extends Application {
 
             Log.i(TAG, "attachBaseContext 解密完成 dexFiles : " + dexFiles);
 
-            for(int i = 0; i < dexFiles.size(); i ++){
+            for (int i = 0; i < dexFiles.size(); i++) {
                 Log.i(TAG, i + " . " + dexFiles.get(i).getAbsolutePath());
             }
 
@@ -274,11 +274,161 @@ public class ProxyApplication extends Application {
 
         /*
             4 . 替换 ClassLoader 加载过程中的 Element[] dexElements 数组 ( 封装在 DexPathList 中 )
-
          */
         dexElementsField.set(pathList, newElements);
 
         Log.i(TAG, "loadDex 完成");
+
+    }
+
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+
+        try {
+
+        /*
+            在此处进行 Application 替换
+         */
+
+            // 先判断是否有配置 Application ,
+            // 那么在 Manifest.xml 中的 meta-data 元数据 app_name 不为空
+            // 如果开发者没有自定义 Application , 没有配置元数据 , 直接退出
+            if (TextUtils.isEmpty(app_name)) {
+                return;
+            }
+
+            // 获取上下文对象 , 保存下来 , 之后要使用
+            Context baseContext = getBaseContext();
+
+
+            // 通过反射获取 Application , 系统也是进行的反射操作
+            Class<?> delegateClass = Class.forName(app_name);
+
+            // 创建用户真实配置的 Application
+            Application delegate = (Application) delegateClass.newInstance();
+
+            // 调用 Application 的 attach 函数
+            // 该函数无法直接调用 , 也需要通过反射调用
+            // 这里先通过反射获取 Application 的 attach 函数
+            Method attach = Application.class.getDeclaredMethod("attach", Context.class);
+            // attach 方法是私有的 , 设置 attach 方法允许访问
+            attach.setAccessible(true);
+
+            // 获取上下文对象 ,
+            // 该 Context 是通过调用 Application 的 attachBaseContext 方法传入的 ContextImpl
+            // 将该上下文对象传入 Application 的 attach 方法中
+            attach.invoke(delegate, baseContext);
+
+
+            /*
+                截止到此处, Application 创建完毕 , 下面开始逐个替换下面的 Application
+
+                ① ContextImpl 的 private Context mOuterContext
+                    成员是 kim.hsl.multipledex.ProxyApplication 对象 ;
+
+                ② ActivityThread 中的 ArrayList<Application> mAllApplications
+                    集合中添加了 kim.hsl.multipledex.ProxyApplication 对象 ;
+
+                ③ LoadedApk 中的 mApplication 成员是 kim.hsl.multipledex.ProxyApplication 对象 ;
+
+                ④ ActivityThread 中的 Application mInitialApplication
+                    成员是 kim.hsl.multipledex.ProxyApplication 对象 ;
+             */
+
+            // I . 替换 ① ContextImpl 的 private Context mOuterContext
+            //  成员是 kim.hsl.multipledex.ProxyApplication 对象
+            Class<?> contextImplClass = Class.forName("android.app.ContextImpl");
+            // 获取 ContextImpl 中的 mOuterContext 成员
+            Field mOuterContextField = contextImplClass.getDeclaredField("mOuterContext");
+            // mOuterContext 成员是私有的 , 设置可访问性
+            mOuterContextField.setAccessible(true);
+            // ContextImpl 就是应用的 Context , 直接通过 getBaseContext() 获取即可
+            mOuterContextField.set(baseContext, delegate);
+
+
+
+
+            // II . 替换 ④ ActivityThread 中的 Application mInitialApplication
+            //                    成员是 kim.hsl.multipledex.ProxyApplication 对象 ;
+            Class<?> activityThreadClass = Class.forName("android.app.ActivityThread");
+            // 获取 ActivityThread 中的 mInitialApplication 成员
+            Field mInitialApplicationField =
+                    activityThreadClass.getDeclaredField("mInitialApplication");
+            // mInitialApplication 成员是私有的 , 设置可访问性
+            mInitialApplicationField.setAccessible(true);
+
+            // 从 ContextImpl 对象中获取其 ActivityThread mMainThread 成员变量
+            Field mMainThreadField = contextImplClass.getDeclaredField("mMainThread");
+            mMainThreadField.setAccessible(true);
+            // ContextImpl 就是本应用的上下文对象 , 调用 getBaseContext 方法获得
+            Object mMainThread = mMainThreadField.get(baseContext);
+
+            // ContextImpl 就是应用的 Context , 直接通过 getBaseContext() 获取即可
+            mInitialApplicationField.set(mMainThread, delegate);
+
+
+
+            // III . 替换 ② ActivityThread 中的 ArrayList<Application> mAllApplications
+            //                    集合中添加了 kim.hsl.multipledex.ProxyApplication 对象 ;
+
+            // 获取 ActivityThread 中的 mAllApplications 成员
+            Field mAllApplicationsField =
+                    activityThreadClass.getDeclaredField("mAllApplications");
+            // mAllApplications 成员是私有的 , 设置可访问性
+            mAllApplicationsField.setAccessible(true);
+
+            // 获取 ActivityThread 中的 ArrayList<Application> mAllApplications 队列
+            ArrayList<Application> mAllApplications =
+                    (ArrayList<Application>) mAllApplicationsField.get(mMainThread);
+            // 将真实的 Application 添加到上述队列中
+            mAllApplications.add(delegate);
+
+
+
+            // IV . 替换 ③ LoadedApk 中的 mApplication
+            //          成员是 kim.hsl.multipledex.ProxyApplication 对象
+
+            // 1. 先获取 LoadedApk 对象
+            // LoadedApk 是 ContextImpl 中的 LoadedApk mPackageInfo 成员变量
+            // 从 ContextImpl 对象中获取其 LoadedApk mPackageInfo 成员变量
+            Field mPackageInfoField = contextImplClass.getDeclaredField("mPackageInfo");
+            mPackageInfoField.setAccessible(true);
+            // ContextImpl 就是本应用的上下文对象 , 调用 getBaseContext 方法获得
+            Object mPackageInfo = mPackageInfoField.get(baseContext);
+
+            // 2. 获取 LoadedApk 对象中的 mApplication 成员
+            Class<?> loadedApkClass = Class.forName("android.app.LoadedApk");
+            // 获取 ActivityThread 中的 mInitialApplication 成员
+            Field mApplicationField =
+                    loadedApkClass.getDeclaredField("mApplication");
+            // LoadedApk 中的 mApplication 成员是私有的 , 设置可访问性
+            mApplicationField.setAccessible(true);
+
+            // 3. 将 Application 设置给 LoadedApk 中的 mApplication 成员
+            mApplicationField.set(mPackageInfo, delegate);
+
+
+
+            // 再次调用 onCreate 方法
+            delegate.onCreate();
+
+
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        } catch (NoSuchFieldException exception) {
+            exception.printStackTrace();
+        }
+
 
     }
 }
