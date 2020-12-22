@@ -302,7 +302,6 @@ public class ProxyApplication extends Application {
             // 获取上下文对象 , 保存下来 , 之后要使用
             Context baseContext = getBaseContext();
 
-
             // 通过反射获取 Application , 系统也是进行的反射操作
             Class<?> delegateClass = Class.forName(app_name);
 
