@@ -322,6 +322,9 @@ public class ProxyApplication extends Application {
 
 
             /*
+                参考 : https://hanshuliang.blog.csdn.net/article/details/111569017 博客
+                查询应该替换哪些对象中的哪些成员
+
                 截止到此处, Application 创建完毕 , 下面开始逐个替换下面的 Application
 
                 ① ContextImpl 的 private Context mOuterContext
@@ -408,6 +411,21 @@ public class ProxyApplication extends Application {
             // 3. 将 Application 设置给 LoadedApk 中的 mApplication 成员
             mApplicationField.set(mPackageInfo, delegate);
 
+
+            // V . 下一步操作替换替换 ApplicationInfo 中的 className , 该操作不是必须的 , 不替换也不会报错
+            // 在应用中可能需要操作获取应用的相关信息 , 如果希望获取准确的信息 , 需要替换 ApplicationInfo
+            // ApplicationInfo 在 LoadedApk 中
+
+            Field mApplicationInfoField = loadedApkClass.getDeclaredField("mApplicationInfo");
+            // 设置该字段可访问
+            mApplicationInfoField.setAccessible(true);
+
+            // mPackageInfo 就是 LoadedApk 对象
+            // mApplicationInfo 就是从 LoadedApk 对象中获得的 mApplicationInfo 字段
+            ApplicationInfo mApplicationInfo = (ApplicationInfo) mApplicationInfoField.get(mPackageInfo);
+
+            // 设置 ApplicationInfo 中的 className 字段值
+            mApplicationInfo.className = app_name;
 
 
             // 再次调用 onCreate 方法

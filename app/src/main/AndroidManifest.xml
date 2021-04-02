@@ -26,6 +26,19 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <service android:name=".MyService" />
+
+        <receiver android:name=".MyBroadCastReciver">
+            <intent-filter>
+                <action android:name="kim.hsl.dex.broadcast" />
+            </intent-filter>
+        </receiver>
+
+        <provider
+            android:exported="true"
+            android:name=".MyProvider"
+            android:authorities="kim.hsl.dex.myprovider" />
     </application>
 
 </manifest>
