@@ -329,7 +329,7 @@ public class ProxyApplication extends Application {
             // 先进行 Application 替换
             applicationExchange();
             // Application 替换完成之后 , 再继续向下执行创建 ContentProvider
-            return super.createPackageContext(packageName, flags);
+            return delegate;
         }
     }
 

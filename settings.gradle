@@ -1,3 +1,4 @@
+include ':app2'
 rootProject.name='DexEncryption'
 include ':app'
 include ':multiple-dex-core'
