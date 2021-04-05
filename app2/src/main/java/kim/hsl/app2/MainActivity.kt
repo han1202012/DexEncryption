@@ -9,6 +9,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        // 测试 ContentProvider
         contentResolver.delete(
             Uri.parse("content://kim.hsl.dex.myprovider"),
             null,
